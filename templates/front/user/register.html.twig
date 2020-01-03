@@ -1,0 +1,14 @@
+{% extends '/front/base.html.twig' %}
+
+{% block title %}{{ controller_name }}{% endblock %}
+
+{% block body %}
+<section class="row justify-content-center" id="registration">
+    <div class="col-lg-6 bg-faded py-4">
+        {{ form_start(form)}}
+        {{ form_widget(form) }}
+        <button type="submit" class="btn btn-success">Envoyer</button>
+        {{ form_end(form) }}
+    </div>
+</section>
+{% endblock %}
