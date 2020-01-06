@@ -2,11 +2,14 @@
 
 namespace App\Entity;
 
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * ORM/HasLifecycleCallbacks()
  */
 class User implements UserInterface
 {
@@ -23,9 +26,14 @@ class User implements UserInterface
     private $email;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(type="string", length=255)
      */
-    private $roles = [];
+    private $slug;
+    
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Role", mappedBy="users")
+     */
+    private $roles;
 
     /**
      * @var string The hashed password
@@ -78,6 +86,16 @@ class User implements UserInterface
      */
     private $birthday;
 
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Avatar", mappedBy="user", cascade={"persist", "remove"})
+     */
+    private $avatar;
+
+    public function __construct()
+    {
+        $this->roles = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +109,33 @@ class User implements UserInterface
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+    
+    /**
+     * Init Slug
+     *
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     * @return void
+     */
+    public function initializeSlug()
+    {
+        if(empty($this->slug)){
+            $slugify = new Slugify();
+            $this->slug = $slugify->slugify($this->firstname.' '.$this->lastname);
+        }
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }
@@ -108,18 +153,33 @@ class User implements UserInterface
     /**
      * @see UserInterface
      */
-    public function getRoles(): array
+    public function getRoles()
     {
-        $roles = $this->roles;
+        $roles = $this->roles->map(function($role){
+            return $role->getTitle();
+        })->toArray();
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+        return $roles;
     }
 
-    public function setRoles(array $roles): self
+    public function addRole(Role $role): self
     {
-        $this->roles = $roles;
+        if (!$this->roles->contains($role)) {
+            $this->roles[] = $role;
+            $role->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRole(Role $role): self
+    {
+        if ($this->roles->contains($role)) {
+            $this->roles->removeElement($role);
+            $role->removeUser($this);
+        }
 
         return $this;
     }
@@ -178,6 +238,11 @@ class User implements UserInterface
         $this->firstname = $firstname;
 
         return $this;
+    }
+
+    public function getFullname() 
+    {
+        return $this->firstname.' '.$this->lastname;
     }
 
     public function getAddress(): ?string
@@ -263,4 +328,23 @@ class User implements UserInterface
 
         return $this;
     }
+
+    public function getAvatar(): ?Avatar
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?Avatar $avatar): self
+    {
+        $this->avatar = $avatar;
+
+        // set (or unset) the owning side of the relation if necessary
+        $newUser = null === $avatar ? null : $this;
+        if ($avatar->getUser() !== $newUser) {
+            $avatar->setUser($newUser);
+        }
+
+        return $this;
+    }
+
 }
