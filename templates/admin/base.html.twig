@@ -16,7 +16,7 @@
             <div id="content-wrapper" class="d-flex flex-column">
                 <!-- Main Content -->
                 <div id="content">
-                    {% include '/admin/partials/_topbar.html.twig' %}
+                    {{ topbar.display() }}
                     <!-- Begin Page Content -->
                     <div class="container-fluid">
                         {% block body %}{% endblock %}

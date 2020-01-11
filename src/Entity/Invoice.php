@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -32,7 +34,7 @@ class Invoice
     private $paid;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255)
      */
     private $pdf;
 
@@ -47,9 +49,26 @@ class Invoice
     private $expiry;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="invoices")
+     */
+    private $user;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Invoice", inversedBy="monthly")
+     */
+    private $invoice;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Invoice", mappedBy="invoice")
      */
     private $monthly;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime('now');
+        $this->invoices = new ArrayCollection();
+        $this->monthly = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -97,7 +116,7 @@ class Invoice
         return $this->pdf;
     }
 
-    public function setPdf(?string $pdf): self
+    public function setPdf(string $pdf): self
     {
         $this->pdf = $pdf;
 
@@ -128,15 +147,60 @@ class Invoice
         return $this;
     }
 
-    public function getMonthly(): ?bool
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getInvoice(): ?self
+    {
+        return $this->invoice;
+    }
+
+    public function setInvoice(?self $invoice): self
+    {
+        $this->invoice = $invoice;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|self[]
+     */
+    public function getMonthly(): Collection
     {
         return $this->monthly;
     }
 
-    public function setMonthly(bool $monthly): self
+    public function addMonthly(self $monthly): self
     {
-        $this->monthly = $monthly;
+        if (!$this->monthly->contains($monthly)) {
+            $this->monthly[] = $monthly;
+            $monthly->setInvoice($this);
+        }
 
         return $this;
     }
+
+    public function removeMonthly(self $monthly): self
+    {
+        if ($this->monthly->contains($monthly)) {
+            $this->monthly->removeElement($monthly);
+            // set the owning side to null (unless already changed)
+            if ($monthly->getInvoice() === $this) {
+                $monthly->setInvoice(null);
+            }
+        }
+
+        return $this;
+    }
+
+
 }

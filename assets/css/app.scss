@@ -3,3 +3,9 @@
 body {
     background-color: lightgray;
 }
+
+[type=button], [type=reset], [type=submit], button {
+    -webkit-appearance: none!important;
+}
+
+

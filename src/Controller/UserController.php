@@ -6,6 +6,7 @@ use App\Entity\Avatar;
 use App\Form\AvatarType;
 use App\Form\AccountType;
 use Cocur\Slugify\Slugify;
+use App\Service\TopBarService;
 use App\Repository\UserRepository;
 use App\Repository\AvatarRepository;
 use App\Service\FileUploaderService;
@@ -23,7 +24,7 @@ class UserController extends AbstractController
      * }, name="user_edit")
      *
      */
-    public function edit($slug = null, UserRepository $users, Request $request, AvatarRepository $avatar, FileUploaderService $fileUploader)
+    public function edit($slug = null, UserRepository $users, Request $request, AvatarRepository $avatar, FileUploaderService $fileUploader, TopBarService $topbar)
     {
         if($slug == null){
             $user = $this->getUser();
@@ -59,7 +60,7 @@ class UserController extends AbstractController
             $avatarFile = $formAvatar['file']->getData();
             // so the avatar file must be processed only when a file is uploaded
             if ($avatarFile) {
-                $avatarFileName = $fileUploader->setTargetDirectory('source/img/user/'.$user->getSlug().'/avatar')->upload($avatarFile);
+                $avatarFileName = $fileUploader->setTargetDirectory('source/user/'.$user->getSlug().'/img/avatar')->upload($avatarFile);
                 // updates the 'brochureFilename' property to store the PDF file name
                 // instead of its contents
                 if($lastAvatar){
@@ -85,7 +86,7 @@ class UserController extends AbstractController
             'controller_name' => 'UserController',
             'form' => $form->createView(),
             'form_avatar' => $formAvatar->createView(),
-            'user' => $this->getUser(),
+            'topbar' => $topbar,
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -91,9 +92,15 @@ class User implements UserInterface
      */
     private $avatar;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Invoice", mappedBy="user")
+     */
+    private $invoices;
+
     public function __construct()
     {
         $this->roles = new ArrayCollection();
+        $this->invoices = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -329,9 +336,14 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getAvatar(): ?Avatar
+    public function getAvatar()
     {
-        return $this->avatar;
+        if(empty($this->avatar) || $this->avatar == null) {
+            $avatar = "http://placehold.it/120x120";
+        }else {
+            $avatar ='/source/user/'.$this->getSlug().'/img/avatar/'.$this->avatar->getName();
+        }
+        return $avatar;
     }
 
     public function setAvatar(?Avatar $avatar): self
@@ -342,6 +354,37 @@ class User implements UserInterface
         $newUser = null === $avatar ? null : $this;
         if ($avatar->getUser() !== $newUser) {
             $avatar->setUser($newUser);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Invoice[]
+     */
+    public function getInvoices(): Collection
+    {
+        return $this->invoices;
+    }
+
+    public function addInvoice(Invoice $invoice): self
+    {
+        if (!$this->invoices->contains($invoice)) {
+            $this->invoices[] = $invoice;
+            $invoice->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvoice(Invoice $invoice): self
+    {
+        if ($this->invoices->contains($invoice)) {
+            $this->invoices->removeElement($invoice);
+            // set the owning side to null (unless already changed)
+            if ($invoice->getUser() === $this) {
+                $invoice->setUser(null);
+            }
         }
 
         return $this;

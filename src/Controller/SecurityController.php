@@ -65,7 +65,7 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('admin');
         } 
 
-        return $this->render('/front/user/register.html.twig', [
+        return $this->render('/admin/user/register.html.twig', [
             'controller_name' => 'Inscription',
             'form' => $form->createView(),
         ]);
