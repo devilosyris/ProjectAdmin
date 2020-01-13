@@ -28,3 +28,9 @@ services:
     App\Service\TopBarService :
         arguments :
             $templatePath : 'admin/partials/_topbar.html.twig'
+
+    # Need entityClass
+    # (Pagination admin View) Service
+    App\Service\PaginationService :
+        arguments :
+            $templatePath : 'admin/partials/_pagination.html.twig'

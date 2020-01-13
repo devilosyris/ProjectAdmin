@@ -38,7 +38,7 @@ class TopBarService{
 
     public function display() {
         $this->twig->display($this->templatePath, [
-            'user' => $this->getUser(),
+            'user' => $this->user,
         ]);
     }
 }

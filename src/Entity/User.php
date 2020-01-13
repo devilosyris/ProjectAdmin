@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * ORM/HasLifecycleCallbacks()
+ * @ORM\HasLifecycleCallbacks()
  */
 class User implements UserInterface
 {
@@ -30,7 +30,7 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255)
      */
     private $slug;
-    
+
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Role", mappedBy="users")
      */
@@ -119,7 +119,7 @@ class User implements UserInterface
 
         return $this;
     }
-    
+
     /**
      * Init Slug
      *
@@ -131,7 +131,7 @@ class User implements UserInterface
     {
         if(empty($this->slug)){
             $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->firstname.' '.$this->lastname);
+            $this->slug = $slugify->slugify($this->firstname. ' ' . $this->lastname);
         }
     }
 
@@ -247,8 +247,7 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getFullname() 
-    {
+    public function getFullname(){
         return $this->firstname.' '.$this->lastname;
     }
 
@@ -338,10 +337,10 @@ class User implements UserInterface
 
     public function getAvatar()
     {
-        if(empty($this->avatar) || $this->avatar == null) {
+        if(empty($this->avatar) || $this->avatar == null ){
             $avatar = "http://placehold.it/120x120";
-        }else {
-            $avatar ='/source/user/'.$this->getSlug().'/img/avatar/'.$this->avatar->getName();
+        }else{
+            $avatar = '/source/user/'.$this->getSlug().'/img/avatar/'.$this->avatar->getName();
         }
         return $avatar;
     }

@@ -7,6 +7,7 @@ use App\Form\InvoiceType;
 use App\Service\TopBarService;
 use App\Repository\InvoiceRepository;
 use App\Service\FileUploaderService;
+use App\Service\PaginationService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,24 +15,32 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class InvoiceController extends AbstractController
 {
     /**
-     * @Route("/admin/facture/payée", name="paid")
-     * @Route("/admin/facture/impayée", name="unpaid")
-     * @Route("/admin/facture/", name="invoice")
+     * @Route("/admin/facture/payés/{page<\d+>?1}", name="paid")
+     * @Route("/admin/facture/impayés/{page<\d+>?1}", name="unpaid")
+     * @Route("/admin/facture/{page<\d+>?1}", name="invoice")
      */
-    public function index(TopBarService $topbar, InvoiceRepository $repo, Request $request)
+    public function index(TopBarService $topbar, Request $request, PaginationService $pagination)
     {   
+        $pagination->setEntityClass(Invoice::class);
+        dump($pagination->setFilter(['paid' => '0']));
+
         $route = $request->attributes->get('_route');
         if($route == "unpaid") {
-            $invoices = $repo->findBy([ 'paid' => '0', 'invoice' => null]);
+            $pagination->setFilter(['paid' => 0]);
         }elseif($route == "paid"){
-            $invoices = $repo->findBy([ 'paid' => '1', 'invoice' => null]);
+            $pagination->setFilter(['paid' => 1]);
         }else {
-            $invoices = $repo->findBY(['invoice' => null]);
+            $pagination->setFilter([]);
         }
+
+        if($pagination->getPage() > $pagination->getTotalPage()) {
+            
+        }
+
          return $this->render('/admin/invoice/index.html.twig', [
             'controller_name' => 'Facturation',
             'topbar' => $topbar,
-            'invoices' => $invoices,
+            'pagination' => $pagination
         ]);
     }
 

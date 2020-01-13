@@ -5,7 +5,7 @@
 {% block body %}
 <!-- Page Heading -->
     <h1 class="h3 mb-2 text-gray-800">Factures</h1>
-    {% if invoices %}
+    {% if pagination.data %}
         <div class="row justify-content-center p-4">
             <div class="col-11">
                 <div class="card">
@@ -32,7 +32,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for invoice in invoices %}
+                                        {% for invoice in pagination.data %}
                                             <tr type="button" data-toggle="collapse" data-target="#collapseExample{{ invoice.id }}" aria-expanded="false" aria-controls="collapseExample{{ invoice.id }}">
                                                 <td>
                                                     {{invoice.id}}
@@ -86,6 +86,9 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                        <div class="row justify-content-center mt-2 ">
+                            {{ pagination.display() }}
                         </div>
                     </div>
                 </div>
