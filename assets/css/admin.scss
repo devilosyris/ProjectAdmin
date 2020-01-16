@@ -1,0 +1,9 @@
+@import url('./sb-admin-2.css');
+
+body {
+    background-color: lightgray;
+}
+
+[type=button], [type=reset], [type=submit], button {
+    -webkit-appearance: none!important;
+}

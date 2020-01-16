@@ -14,4 +14,5 @@ require('../css/app.scss');
 // const $ = require('jquery');
 require('bootstrap');
 require('@fortawesome/fontawesome-free');
-require('../js/sb-admin-2.js');
+require('./portfolio.js');
+require('./grayscale.min.js');

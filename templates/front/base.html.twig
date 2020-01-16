@@ -10,10 +10,12 @@
     </head>
     <body id="page-top">
         <!-- Begin Page Content -->
-        <div class="container-fluid">
-            {% block body %}{% endblock %}
-        </div>
+        {{ include('/front/partials/_navbar.html.twig') }}
+        {{ include('/front/partials/_header.html.twig') }}
+        {% block body %}{% endblock %}
+        
         <!-- /.container-fluid -->
+        {{ include('/front/partials/_footer.html.twig') }}
     </div>
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
