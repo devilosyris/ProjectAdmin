@@ -51,13 +51,12 @@ class InvoiceType extends AbstractType
                     ])
                 ],
             ])
-            ->add('expiry',DateType::class, ['label' => 'Date d\'expiration', 'attr' => ['placeholder' => 'Entrez la']])
-            ->add('monthly',ChoiceType::class, [
-                'choices' => [
-                    'Mensualité' => true,
-                    'Comptant' => false,
-                ],
-                'label' => 'Mensualité', 'attr' => ['placeholder' => 'Est-ce une mensualité ?']
+            ->add('expiry',DateType::class, ['label' => 'Date d\'expiration', 'attr' => ['placeholder' => 'Entrez la date d\'expiration de la facture']])
+            ->add('invoice', EntityType::class, [
+                'required' => false,
+                'class' => Invoice::class,
+                'choice_label' => 'name',
+                'label' => 'Mensualité', 'attr' => ['placeholder' => 'Renseignez si votre facture est une mensualité et la facture auquelles celle-ci s\'y rapporte']
             ])
             ->add('user', EntityType::class, [
                 'required' => false,

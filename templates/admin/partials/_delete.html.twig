@@ -1,0 +1,14 @@
+<!-- Modal -->
+<div class="modal fade" id="deleteModal{{modalId}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        {{textDelete|raw}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Annuler</button>
+        <a href="{{ path( linkDelete, paramsDelete) }}"><button type="button" class="btn btn-danger">Supprimer</button></a>
+      </div>
+    </div>
+  </div>
+</div>

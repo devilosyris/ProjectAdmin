@@ -19,6 +19,7 @@
                     {{ topbar.display() }}
                     <!-- Begin Page Content -->
                     <div class="container-fluid">
+                        {{ include('admin/partials/_flash.html.twig') }}
                         {% block body %}{% endblock %}
                     </div>
                     <!-- /.container-fluid -->

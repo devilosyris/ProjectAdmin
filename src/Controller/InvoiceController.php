@@ -21,20 +21,18 @@ class InvoiceController extends AbstractController
      */
     public function index(TopBarService $topbar, Request $request, PaginationService $pagination)
     {   
+        $route = $request->attributes->get('_route');
+
         $pagination->setEntityClass(Invoice::class);
         dump($pagination->setFilter(['paid' => '0']));
 
         $route = $request->attributes->get('_route');
         if($route == "unpaid") {
-            $pagination->setFilter(['paid' => 0]);
+            $pagination->setFilter(['paid' => 0, 'invoice' => null]);
         }elseif($route == "paid"){
-            $pagination->setFilter(['paid' => 1]);
-        }else {
-            $pagination->setFilter([]);
-        }
-
-        if($pagination->getPage() > $pagination->getTotalPage()) {
-            
+            $pagination->setFilter(['paid' => 1, 'invoice' => null]);
+        }elseif($route == "invoice") {
+            $pagination->setFilter(['invoice' => null]);
         }
 
          return $this->render('/admin/invoice/index.html.twig', [
@@ -84,9 +82,13 @@ class InvoiceController extends AbstractController
             }
             $manager->persist($invoice);
             $manager->flush();
-
+            if($route == 'invoice_create'){
+                $this->addFlash('success', 'La facture n°<b>'.$invoice->getId().'</b> a bien été créée.');
+            } else {
+                $this->addFlash('success', 'La facture n°<b>'.$invoice->getId().'</b> a bien été modifiée.');
+            }
             // Redirect to login form
-            return $this->redirectToRoute('admin');
+            return $this->redirectToRoute('invoice');
         }
 
         return $this->render('/admin/invoice/edit.html.twig', [
@@ -98,16 +100,16 @@ class InvoiceController extends AbstractController
     }
 
     /**
-    * 
+    * @Route("/admin/facture/supprimer/{invoiceId}", name="invoice_delete")
     **/
-    public function edit(){
+    public function deleteInvoice($invoiceId, InvoiceRepository $invoices){
+        $manager = $this->getDoctrine()->getManager();
+        $invoice = $invoices->find($invoiceId);
+        $this->addFlash('warning', 'La facture n°<b>'.$invoice->getId().'</b> a bien été supprimée.');
+        $manager->remove($invoice);
+        $manager->flush();
         
-    }
 
-    /**
-    * @Route("/admin/facture/supprimer", name="invoice_delete")
-    **/
-    public function delete(){
-        
+        return $this->redirectToRoute('invoice');
     }
 }

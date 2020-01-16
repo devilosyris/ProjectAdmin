@@ -10,9 +10,22 @@
             <div class="col-11">
                 <div class="card">
                     <div class="card-header">
-                        <a class="btn btn-success float-right" href="{{ path('invoice_create') }}" role="button">
-                            <span><i class="fas fa-plus"></i> Ajouter une facture</span>
-                        </a>
+                        <ul class="nav nav-pills card-header-tabs float-left">
+                            <li class="nav-item">
+                                <a class="nav-link {% if pagination.route == "invoice" %}active{% endif %}" href="{{ path('invoice') }}">Toutes les factures</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if pagination.route == "paid" %}active{% endif %}" href="{{ path('paid') }}">Payés</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if pagination.route == "unpaid" %}active{% endif %}" href="{{ path('unpaid') }}">Impayés</a>
+                            </li>
+                        </ul>
+                        <div class="float-right">
+                            <a class="btn btn-success" href="{{ path('invoice_create') }}" role="button">
+                            <i class="fas fa-plus"></i> <span class="d-none d-lg-inline-block">Ajouter une facture</span>
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body mt-2">
                         <div class="table-responsive">
@@ -20,7 +33,6 @@
                                 <table class="table table-bordered" id="dataTable"  cellspacing="0" >
                                     <thead>
                                         <tr>
-                                            <th>N°</th>
                                             <th>Nom</th>
                                             <th>Montant</th>
                                             <th>Date</th>
@@ -33,17 +45,14 @@
                                     </thead>
                                     <tbody>
                                         {% for invoice in pagination.data %}
-                                            <tr type="button" data-toggle="collapse" data-target="#collapseExample{{ invoice.id }}" aria-expanded="false" aria-controls="collapseExample{{ invoice.id }}">
-                                                <td>
-                                                    {{invoice.id}}
-                                                </td>
+                                            <tr type="button" data-toggle="collapse" data-target="#collapseExample{{invoice.id}}" aria-expanded="false" aria-controls="collapseExample{{invoice.id}}">
                                                 <td>{{invoice.name}}</td>
                                                 <td>
                                                     {{invoice.amount|number_format(2, ',', '.')}} €
                                                 </td>
                                                 <td>{{invoice.createdAt|date('d/m/Y')}}</td>
                                                 <td>{{invoice.expiry|date('d/m/Y')}}</td>
-                                                <td>{% if invoice.paid == 1 %}<span class="text-success">Payée</span>{% else %}<span class="text-danger">Impayée</span>{% endif %}</td>
+                                                <td>{% if invoice.paid == 1 %}<span class="text-success">Payée</span>{% else %}<span class="text-warning">Impayée</span>{% endif %}</td>
                                                 <td class="text-center">{% if invoice.pdf %}<a href="{{ asset('source/pdf/invoice/' ~ invoice.pdf) }}" target="_blank"><i class="fas fa-file-invoice"></i></a>{% endif %}</td>
                                                 <td>
                                                     {% if invoice.user %}
@@ -51,45 +60,71 @@
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-center">
-                                                    <span><a  class="text-info" href=""><i class="fas fa-edit"></i></a></span>
-                                                    <span><a  class="text-danger" href=""><i class="fas fa-trash"></i></a></span>
+                                                    <span><a  class="text-info" href="{{ path('invoice_edit', {'invoiceId' : invoice.id}) }}"><i class="fas fa-edit"></i></a></span>
+                                                   <button type="button" class="btn" data-toggle="modal" data-target="#deleteModal{{invoice.id}}">
+                                                        <span><a class="text-danger"><i class="fas fa-trash"></i></a></span>
+                                                    </button>
+                                                    {% set textDelete, linkDelete, paramsDelete, modalId = "Êtes vous-sûre de supprimer <b>" ~ invoice.name ~ "</b>?<br> Vous perdrez toutes les informations.", "invoice_delete", {'invoiceId': invoice.id}, invoice.id  %}
+                                                    {{ include("/admin/partials/_delete.html.twig") }}
                                                 </td>
                                             </tr>
-                                            {% if invoice.monthly %}
-                                                {% for monthly in invoice.monthly %}
-                                                    
-                                                    <tr class="collapse table-warning" id="collapseExample{{invoice.id}}">
-                                                        <td>
-                                                            {{monthly.id}}
-                                                        </td>
-                                                        <td>{{monthly.name}}</td>
-                                                        <td>
-                                                            {{monthly.amount|number_format(2, ',', '.')}} €
-                                                        </td>
-                                                        <td>{{monthly.createdAt|date('d/m/Y')}}</td>
-                                                        <td>{{monthly.expiry|date('d/m/Y')}}</td>
-                                                        <td>{% if monthly.paid == 1 %}<span class="text-success">Payée</span>{% else %}<span class="text-danger">Impayée</span>{% endif %}</td>
-                                                        <td class="text-center">{% if monthly.pdf %}<a href="{{ asset('source/pdf/invoice/' ~ monthly.pdf) }}" target="_blank"><i class="fas fa-file-invoice"></i></a>{% endif %}</td>
-                                                        <td>
-                                                            {% if monthly.user %}
-                                                                {{ monthly.user.fullname }}
-                                                            {% endif %}
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <span><a  class="text-info" href=""><i class="fas fa-edit"></i></a></span>
-                                                            <span><a  class="text-danger" href=""><i class="fas fa-trash"></i></a></span>
-                                                        </td>
+                                        </tbody>
+                                            {% if invoice.monthly is not empty %}
+                                                <thead class="collapse " id="collapseExample{{invoice.id}}">
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Nom</th>
+                                                        <th>Montant</th>
+                                                        <th>Date</th>
+                                                        <th>Date limite</th>
+
+                                                        <th>Statut</th>
+                                                        <th>PDF</th>
+                                                        <th>Action</th>
                                                     </tr>
-                                                {% endfor %}
+                                                </thead>
+                                                <tbody class="collapse " id="collapseExample{{invoice.id}}">
+                                                    {% for monthly in invoice.monthly %}
+                                                        <tr class="collapse table-info " id="collapseExample{{invoice.id}}" colspan="10">
+                                                            <td></td>
+                                                            <td>{{monthly.name}}</td>
+                                                            <td>
+                                                                {{monthly.amount|number_format(2, ',', '.')}} €
+                                                            </td>
+                                                            <td>{{monthly.createdAt|date('d/m/Y')}}</td>
+                                                            <td>{{monthly.expiry|date('d/m/Y')}}</td>
+                                                            <td>{% if invoice.paid == 1 %}<span class="text-success">Payée</span>{% else %}<span class="text-warning">Impayée</span>{% endif %}</td>
+                                                            <td>{% if monthly.pdf %}<a href="{{ asset('source/pdf/invoice/' ~ monthly.pdf) }}" target="_blank"><i class="fas fa-file-invoice"></i></a>{% endif %}</td>
+                                                            <td class="text-center">
+                                                                <span><a class="text-info" href=""><i class="fas fa-edit"></i></a></span>
+                                                                <button type="button" class="btn" data-toggle="modal" data-target="#deleteModal{{monthly.id}}">
+                                                                    <span><a class="text-danger"><i class="fas fa-trash"></i></a></span>
+                                                                </button>
+                                                                {% set textDelete, linkDelete, paramsDelete, modalId = "Êtes vous-sûre de supprimer <b>" ~ monthly.name ~ "</b>?<br> Vous perdrez toutes les informations.", "invoice_delete", {'invoiceId': monthly.id}, monthly.id  %}
+                                                                {{ include("/admin/partials/_delete.html.twig") }}
+                                                            </td>
+
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+
+
                                             {% endif %}
+
+
+
                                         {% endfor %}
+
+
                                     </tbody>
                                 </table>
+
                             </div>
                         </div>
-                        <div class="row justify-content-center mt-2 ">
+                        <div class="row justify-content-center mt-3">
                             {{ pagination.display() }}
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -97,3 +132,146 @@
     {% endif %}
     <!-- End of InvoicesActive -->
 {% endblock %}
+
+
+
+{# Design avec flêche #}
+
+{# {% extends '/admin/base.html.twig' %}
+
+{% block title %}{{ parent() }}{{ controller_name }}{% endblock %}
+
+{% block body %}
+<!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Factures</h1>
+    {% if pagination.data %}
+        <div class="row justify-content-center p-4">
+            <div class="col-11">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-pills card-header-tabs float-left">
+                            <li class="nav-item">
+                                <a class="nav-link text-info {% if pagination.route == "invoice" %}active{% endif %}" href="{{ path('invoice')}}">Toutes les factures</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if pagination.route == "paid" %}active{% endif %}" href="{{ path('paid')}}">Payés</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if pagination.route == "unpaid" %}active{% endif %}" href="{{ path('unpaid')}}">Impayés</a>
+                            </li>
+                        </ul>
+
+                        <div class="float-right">
+                            <a class="btn btn-success" href="{{ path('invoice_create') }}" role="button">
+                            <i class="fas fa-plus"></i> <span class="d-none d-lg-inline-block">Ajouter une facture</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body mt-2">
+                        <div class="table-responsive">
+                            <div class="row mx-2">
+                                <table class="table table-bordered" id="dataTable"  cellspacing="0" >
+                                    <thead>
+                                        <tr>
+                                            <th>Nom</th>
+                                            <th>Montant</th>
+                                            <th>Date</th>
+                                            <th>Date limite</th>
+                                            <th>Statut</th>
+                                            <th>PDF</th>
+                                            <th>Utilisateurs</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for invoice in pagination.data %}
+                                            <tr>
+                                                <td>
+                                                    {{invoice.name}}
+                                                    {% if invoice.monthly is not empty %}<a data-toggle="collapse" href="#collapseExample{{invoice.id}}" role="button" aria-expanded="false" aria-controls="collapseExample{{invoice.id}}"><i class="fas fa-arrow-down"></i></a>{% endif %}
+                                                </td>
+                                                <td>
+                                                    {{invoice.amount|number_format(2, ',', '.')}} €
+                                                </td>
+                                                <td>{{invoice.createdAt|date('d/m/Y')}}</td>
+                                                <td>{{invoice.expiry|date('d/m/Y')}}</td>
+                                                <td>{% if invoice.paid == 1 %}<span class="text-success">Payée</span>{% else %}<span class="text-warning">Impayée</span>{% endif %}</td>
+                                                <td class="text-center">{% if invoice.pdf %}<a href="{{ asset('source/pdf/invoice/' ~ invoice.pdf) }}" target="_blank"><i class="fas fa-file-invoice"></i></a>{% endif %}</td>
+                                                <td>
+                                                    {% if invoice.user %}
+                                                        {{ invoice.user.fullname }}
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    <span><a  class="text-info" href="{{ path('invoice_edit', {'invoiceId' : invoice.id}) }}"><i class="fas fa-edit"></i></a></span>
+                                                   <button type="button" class="btn" data-toggle="modal" data-target="#deleteModal{{invoice.id}}">
+                                                        <span><a class="text-danger"><i class="fas fa-trash"></i></a></span>
+                                                    </button>
+                                                    {% set textDelete, linkDelete, paramsDelete, modalId = "Êtes vous-sûre de supprimer <b>" ~ invoice.name ~ "</b>?<br> Vous perdrez toutes les informations.", "invoice_delete", {'invoiceId': invoice.id}, invoice.id  %}
+                                                    {{ include("/admin/partials/_delete.html.twig") }}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                            {% if invoice.monthly is not empty %}
+                                                <thead class="collapse" id="collapseExample{{invoice.id}}">
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Nom</th>
+                                                        <th>Montant</th>
+                                                        <th>Date</th>
+                                                        <th>Date limite</th>
+                                                        <th>Statut</th>
+                                                        <th>PDF</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="collapse " id="collapseExample{{invoice.id}}">
+                                                    {% for monthly in invoice.monthly %}
+                                                        <tr class="collapse table-info " id="collapseExample{{invoice.id}}" colspan="10">
+                                                            <td></td>
+                                                            <td>{{monthly.name}}</td>
+                                                            <td>
+                                                                {{monthly.amount|number_format(2, ',', '.')}} €
+                                                            </td>
+                                                            <td>{{monthly.createdAt|date('d/m/Y')}}</td>
+                                                            <td>{{monthly.expiry|date('d/m/Y')}}</td>
+                                                            <td>{% if invoice.paid == 1 %}<span class="text-success">Payée</span>{% else %}<span class="text-warning">Impayée</span>{% endif %}</td>
+                                                            <td>{% if monthly.pdf %}<a href="{{ asset('source/pdf/invoice/' ~ monthly.pdf) }}" target="_blank"><i class="fas fa-file-invoice"></i></a>{% endif %}</td>
+                                                            <td class="text-center">
+                                                                <span><a class="text-info" href=""><i class="fas fa-edit"></i></a></span>
+                                                                <button type="button" class="btn" data-toggle="modal" data-target="#deleteModal{{monthly.id}}">
+                                                                    <span><a class="text-danger"><i class="fas fa-trash"></i></a></span>
+                                                                </button>
+                                                                {% set textDelete, linkDelete, paramsDelete, modalId = "Êtes vous-sûre de supprimer <b>" ~ monthly.name ~ "</b>?<br> Vous perdrez toutes les informations.", "invoice_delete", {'invoiceId': monthly.id}, monthly.id  %}
+                                                                {{ include("/admin/partials/_delete.html.twig") }}
+                                                            </td>
+
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+
+
+                                            {% endif %}
+
+
+
+                                        {% endfor %}
+
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mt-3">
+                            {{ pagination.display() }}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!-- End of InvoicesActive -->
+{% endblock %}
+ #}
