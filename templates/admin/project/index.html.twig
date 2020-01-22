@@ -1,0 +1,56 @@
+{% extends '/admin/base.html.twig' %}
+
+{% block title %}{{ parent() }}{{ controller_name }}{% endblock %}
+
+{% block body %}
+<!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">{{ controller_name }}</h1>
+    {% if pagination.data %}
+        <div class="row justify-content-center p-4">
+            <div class="col-11">
+                <div class="card">
+                    <div class="card-body mt-2">
+                        <div class="table-responsive">
+                            <div class="row mx-2">
+                                <table class="table table-bordered" id="dataTable"  cellspacing="0" >
+                                    <thead>
+                                        <tr>
+                                            <th>Nom</th>
+                                            <th>Description</th>
+                                            <th>Lien</th>
+                                            <th>Illustration</th>
+                                            <th>Date de création</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for project in pagination.data %}
+                                            <tr type="button" data-toggle="collapse" data-target="#collapseExample{{project.id}}" aria-expanded="false" aria-controls="collapseExample{{project.id}}">
+                                                <td>{{project.name}}</td>
+                                                <td>{{project.description}}</td>
+                                                <td>{{project.link}}</td>
+                                                <td>{{project.Illustration}}</td>
+                                                <td>{{project.createAt|date('d/m/Y')}}</td>
+                                                <td class="text-center">
+                                                    <span><a class="text-info" href="{{ path('project_edit', {'projectId' : project.id}) }}"><i class="fas fa-edit"></i></a></span>
+                                                    <button type="button" class="btn" data-toggle="modal" data-target="#deleteModal{{project.id}}">
+                                                        <span><a class="text-danger"><i class="fas fa-trash"></i></a></span>
+                                                    </button>
+                                                    {% set textDelete, linkDelete, paramsDelete, modalId = "Êtes vous-sûre de supprimer <b>" ~ project.name ~ "</b>?<br> Vous perdrez toutes les informations.", "project_delete", {'projectId': project.id}, project.id  %}
+                                                    {{ include("/admin/partials/_delete.html.twig") }}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mt-3">
+                            {{ pagination.display() }}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

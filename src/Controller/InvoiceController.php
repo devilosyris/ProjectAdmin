@@ -25,8 +25,7 @@ class InvoiceController extends AbstractController
 
         $pagination->setEntityClass(Invoice::class);
         dump($pagination->setFilter(['paid' => '0']));
-
-        $route = $request->attributes->get('_route');
+        
         if($route == "unpaid") {
             $pagination->setFilter(['paid' => 0, 'invoice' => null]);
         }elseif($route == "paid"){

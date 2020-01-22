@@ -2,12 +2,17 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\InvoiceRepository")
+ * @ApiResource(
+ * normalizationContext={"groups"={"invoices_read"}}
+ * )
  */
 class Invoice
 {
@@ -15,6 +20,7 @@ class Invoice
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"invoices_read", "user_read"})
      */
     private $id;
 
@@ -25,6 +31,7 @@ class Invoice
 
     /**
      * @ORM\Column(type="float")
+     * @Groups({"invoices_read", "user_read"})
      */
     private $amount;
 
@@ -50,6 +57,7 @@ class Invoice
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="invoices")
+     * @Groups({"invoices_read"})
      */
     private $user;
 

@@ -11,21 +11,14 @@ class HomeController extends AbstractController
     /**
      * @Route("/", name="home")
      */
-    public function index()
+    public function index(ProjectRepository $repo)
     {
+        $projects = $repo->findAll();
         return $this->render('/front/index.html.twig', [
-            'controller_name' => 'HomeController',
+            'controller_name' => 'Accueil',
+            'projects' => $projects,
+
         ]);
     }
 
-    /**
-     * @Route("/portfolio", name="portfolio")
-     */
-    public function portfolio(ProjectRepository $repo){
-        $projects =$repo->findAll();
-        return $this->render('/front/portfolio.html.twig', [
-            'controller_name' => 'Accueil',
-            'projects' => $projects
-        ]);
-    }
 }

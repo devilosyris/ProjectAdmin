@@ -1,20 +1,68 @@
-{% extends '/front/base.html.twig' %}
+{% extends '/admin/base.html.twig' %}
 
-{% block title %}Hello UserController!{% endblock %}
+{% block title %}{{ parent() }}{{ controller_name }}{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+<!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">{{ controller_name }}</h1>
+    {% if pagination.data %}
+        <div class="row justify-content-center p-4">
+            <div class="col-11">
+                <div class="card">
+                    <div class="card-body mt-2">
+                        <div class="table-responsive">
+                            <div class="row mx-2">
+                                <table class="table table-bordered" id="dataTable"  cellspacing="0" >
+                                    <thead>
+                                        <tr>
+                                            <th>Nom</th>
+                                            <th>Prénom</th>
+                                            <th>Email</th>
+                                            <th>Adresse</th>
+                                            <th>Zip</th>
+                                            <th>Pays</th>
+                                            <th>Téléphone</th>
+                                            <th>Entreprise</th>
+                                            <th>N° Entreprise</th>
+                                            <th>Date d'anniversaire</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for user in pagination.data %}
+                                            <tr type="button" data-toggle="collapse" data-target="#collapseExample{{user.id}}" aria-expanded="false" aria-controls="collapseExample{{user.id}}">
+                                                <td>{{user.lastname}}</td>
+                                                <td>{{user.firstname}}</td>
+                                                <td>{{user.email}}</td>
+                                                <td>{{user.address}}</td>
+                                                <td>{{user.zip}}</td>
+                                                <td>{{user.country}}</td>
+                                                <td>{{user.tel}}</td>
+                                                <td>{{user.companyName}}</td>
+                                                <td>{{user.companyNumber}}</td>
+                                                <td>{{user.birthday|date('d/m/Y')}}</td>
+                                                <td class="text-center">
+                                                    <span><a class="text-info" href="{{ path('user_edit_id', {'userId' : user.id}) }}"><i class="fas fa-edit"></i></a></span>
+                                                    <button type="button" class="btn" data-toggle="modal" data-target="#deleteModal{{user.id}}">
+                                                        <span><a class="text-danger"><i class="fas fa-trash"></i></a></span>
+                                                    </button>
+                                                    {% set textDelete, linkDelete, paramsDelete, modalId = "Êtes vous-sûre de supprimer <b>" ~ user.fullname ~ "</b>?<br> Vous perdrez toutes les informations.", "user_delete", {'userId': user.id}, user.id  %}
+                                                    {{ include("/admin/partials/_delete.html.twig") }}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mt-3">
+                            {{ pagination.display() }}
+                        </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ 'C:/xampp/AdminProject/src/Controller/UserController.php'|file_link(0) }}">src/Controller/UserController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'C:/xampp/AdminProject/templates/user/index.html.twig'|file_link(0) }}">templates/user/index.html.twig</a></code></li>
-    </ul>
-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
 {% endblock %}
