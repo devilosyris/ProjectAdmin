@@ -26,6 +26,7 @@ class Invoice
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"invoices_read"})
      */
     private $name;
 
@@ -37,21 +38,25 @@ class Invoice
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"invoices_read"})
      */
     private $paid;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"invoices_read"})
      */
     private $pdf;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"invoices_read"})
      */
     private $createdAt;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"invoices_read"})
      */
     private $expiry;
 
